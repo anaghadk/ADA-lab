@@ -1,0 +1,85 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int co = 0;
+
+int getMobile(int perm[], int dir[], int n) {
+    int mobile = -1, mobileIndex = -1;
+    for (int i = 0; i < n; i++) {
+        int swapWith = i + dir[i];
+        if (swapWith >= 0 && swapWith < n && perm[i] > perm[swapWith]) {
+            if (perm[i] > mobile) {
+                mobile = perm[i];
+                mobileIndex = i;
+            }
+        }
+    }
+    return mobileIndex;
+}
+
+void printPermutations(int n) {
+    int values[n], perm[n], dir[n];
+
+    printf("Enter numbers: ");
+    for (int i = 0; i < n; i++) {
+        scanf("%d", &values[i]);
+    }
+
+
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (values[i] > values[j]) {
+                int temp = values[i];
+                values[i] = values[j];
+                values[j] = temp;
+            }
+        }
+    }
+
+
+    for (int i = 0; i < n; i++) {
+        perm[i] = i;
+        dir[i] = -1;
+    }
+
+    while (1) {
+
+        for (int i = 0; i < n; i++)
+            printf("%d ", values[perm[i]]);
+        printf("\n");
+        co++;
+
+        int mobileIndex = getMobile(perm, dir, n);
+        if (mobileIndex == -1) break;
+
+        int swapWith = mobileIndex + dir[mobileIndex];
+
+
+        int temp = perm[mobileIndex];
+        perm[mobileIndex] = perm[swapWith];
+        perm[swapWith] = temp;
+
+
+        int tempDir = dir[mobileIndex];
+        dir[mobileIndex] = dir[swapWith];
+        dir[swapWith] = tempDir;
+
+
+        mobileIndex = swapWith;
+
+
+        for (int i = 0; i < n; i++) {
+            if (perm[i] > perm[mobileIndex])
+                dir[i] *= -1;
+        }
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of numbers: ");
+    scanf("%d", &n);
+    printPermutations(n);
+    printf("Total number of permutations: %d\n", co);
+    return 0;
+}
