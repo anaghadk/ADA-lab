@@ -1,0 +1,80 @@
+
+
+#define MAXN 12
+#define MAXMASK (1 << MAXN)
+#define INF 1e9
+
+typedef struct {
+    int node;
+    int mask;
+    int dist;
+} State;
+
+typedef struct {
+    State *data;
+    int front, rear, size, capacity;
+} Queue;
+
+Queue* createQueue(int capacity) {
+    Queue *q = (Queue *)malloc(sizeof(Queue));
+    q->capacity = capacity;
+    q->data = (State *)malloc(sizeof(State) * capacity);
+    q->front = 0;
+    q->rear = -1;
+    q->size = 0;
+    return q;
+}
+
+void enqueue(Queue *q, State s) {
+    if (q->size == q->capacity) return;
+    q->rear = (q->rear + 1) % q->capacity;
+    q->data[q->rear] = s;
+    q->size++;
+}
+
+State dequeue(Queue *q) {
+    State s = q->data[q->front];
+    q->front = (q->front + 1) % q->capacity;
+    q->size--;
+    return s;
+}
+
+int isEmpty(Queue *q) {
+    return q->size == 0;
+}
+
+int shortestPathLength(int** graph, int graphSize, int* graphColSize) {
+    int visited[MAXN][MAXMASK];
+    memset(visited, 0, sizeof(visited));
+
+    int allVisited = (1 << graphSize) - 1;
+    Queue *q = createQueue(100000);
+
+    for (int i = 0; i < graphSize; i++) {
+        enqueue(q, (State){i, 1 << i, 0});
+        visited[i][1 << i] = 1;
+    }
+
+    while (!isEmpty(q)) {
+        State cur = dequeue(q);
+
+        if (cur.mask == allVisited) {
+            free(q->data);
+            free(q);
+            return cur.dist;
+        }
+
+        for (int i = 0; i < graphColSize[cur.node]; i++) {
+            int neighbor = graph[cur.node][i];
+            int nextMask = cur.mask | (1 << neighbor);
+            if (!visited[neighbor][nextMask]) {
+                visited[neighbor][nextMask] = 1;
+                enqueue(q, (State){neighbor, nextMask, cur.dist + 1});
+            }
+        }
+    }
+
+    free(q->data);
+    free(q);
+    return -1;
+}
